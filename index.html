@@ -426,10 +426,12 @@
   </div>
 </div>
 
-<!-- MUSIC PLAYER -->
-<audio id="bgMusic" loop preload="auto">
-  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3" type="audio/mpeg">
-</audio>
+<!-- MUSIC PLAYER — YouTube embed tersembunyi -->
+<div id="ytWrapper" style="position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;overflow:hidden;">
+  <iframe id="ytPlayer" width="1" height="1"
+    src="https://www.youtube.com/embed/X-EK60rmcQs?enablejsapi=1&autoplay=0&loop=1&playlist=X-EK60rmcQs&controls=0&rel=0"
+    frameborder="0" allow="autoplay" allowfullscreen></iframe>
+</div>
 
 <div class="music-bar" id="musicBar">
   <button class="music-btn" id="musicBtn" aria-label="Play musik">
@@ -439,8 +441,8 @@
     <svg id="iconPause" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
   </button>
   <div class="music-info">
-    <span class="music-title">Kenangan Indah</span>
-    <span class="music-sub">Piano · Your Moment ID</span>
+    <span class="music-title">Terbuang Dalam Waktu</span>
+    <span class="music-sub">Barasuara · Your Moment ID</span>
   </div>
   <div class="music-waves paused" id="musicWaves">
     <span></span><span></span><span></span><span></span>
@@ -515,24 +517,39 @@
     }, 800);
   });
 
-  // Music player logic
-  const audio = document.getElementById('bgMusic');
+  // Music player — YouTube IFrame API
+  var ytReady = false;
+  var player;
+  var playing = false;
+
+  window.onYouTubeIframeAPIReady = function() {
+    player = new YT.Player('ytPlayer', {
+      events: {
+        onReady: function() { ytReady = true; }
+      }
+    });
+  };
+
+  // Load YouTube IFrame API
+  var tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(tag);
+
   const btn = document.getElementById('musicBtn');
   const iconPlay = document.getElementById('iconPlay');
   const iconPause = document.getElementById('iconPause');
   const waves = document.getElementById('musicWaves');
-  let playing = false;
 
   btn.addEventListener('click', function() {
+    if (!ytReady || !player) return;
     if (!playing) {
-      audio.play().then(function() {
-        playing = true;
-        iconPlay.style.display = 'none';
-        iconPause.style.display = 'block';
-        waves.classList.remove('paused');
-      }).catch(function() {});
+      player.playVideo();
+      playing = true;
+      iconPlay.style.display = 'none';
+      iconPause.style.display = 'block';
+      waves.classList.remove('paused');
     } else {
-      audio.pause();
+      player.pauseVideo();
       playing = false;
       iconPlay.style.display = 'block';
       iconPause.style.display = 'none';
