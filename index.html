@@ -493,9 +493,16 @@
         document.getElementById('messageFrom').textContent = '— ' + data.from;
       }
 
+      // Load photo — either inline (data.photo) or from localStorage (data.photoKey)
+      let photoSrc = null;
       if (data.photo) {
+        photoSrc = data.photo;
+      } else if (data.photoKey) {
+        try { photoSrc = localStorage.getItem(data.photoKey); } catch(e) {}
+      }
+      if (photoSrc) {
         const img = document.getElementById('mainPhoto');
-        img.src = data.photo;
+        img.src = photoSrc;
         img.style.display = 'block';
         document.getElementById('photoPlaceholder').style.display = 'none';
       }
