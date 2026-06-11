@@ -40,24 +40,32 @@
   input[type="text"]:focus, textarea:focus { border-color: #d4607a; background: white; }
   textarea { resize: vertical; min-height: 110px; line-height: 1.6; }
   input::placeholder, textarea::placeholder { color: #d4a8b8; }
-
   .char-count { text-align: right; font-size: 11px; color: #d4a0b0; margin-top: 4px; }
 
-  /* FOTO LINK INPUT */
-  .photo-tip {
-    background: #fff8f0;
-    border: 0.5px solid #f0d8b8;
-    border-radius: 10px;
-    padding: 12px 14px;
-    font-size: 12px;
-    color: #8a5030;
-    line-height: 1.7;
-    margin-bottom: 10px;
+  /* PHOTO UPLOAD */
+  .photo-upload-area {
+    border: 1.5px dashed #e0b8c8; border-radius: 12px; padding: 28px 20px;
+    text-align: center; cursor: pointer; background: #fdf0f4;
+    transition: border-color 0.2s, background 0.2s; position: relative;
   }
-  .photo-tip strong { display: block; margin-bottom: 4px; color: #6a3820; }
-  .photo-tip ol { padding-left: 16px; }
-  .photo-tip li { margin-bottom: 2px; }
+  .photo-upload-area:hover { border-color: #d4607a; background: #fde8ed; }
+  .photo-upload-area input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .upload-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+  .upload-text { font-size: 13px; color: #b5607a; font-weight: 500; }
+  .upload-hint { font-size: 11px; color: #d4a0b0; margin-top: 4px; }
 
+  .photo-preview { display: none; margin-top: 12px; border-radius: 10px; overflow: hidden; border: 0.5px solid #f0d0da; }
+  .photo-preview img { width: 100%; display: block; max-height: 220px; object-fit: cover; }
+
+  .compress-info {
+    margin-top: 8px; font-size: 11px; color: #b5907a; text-align: center;
+    background: #fff8f0; border-radius: 8px; padding: 6px 10px;
+    border: 0.5px solid #f0dcc8; display: none;
+  }
+
+  /* SUBMIT */
   .submit-section { margin: 0 20px; }
   .submit-btn {
     width: 100%; padding: 16px; background: #c4506a; color: white; border: none;
@@ -78,9 +86,9 @@
     display: inline-block; padding: 13px 28px; background: #c4506a; color: white;
     border-radius: 12px; font-size: 14px; font-weight: 500; text-decoration: none; margin-bottom: 24px;
   }
-  .qr-section { margin-top: 0; padding: 20px; background: white; border-radius: 16px; border: 0.5px solid #f0d0da; }
+  .qr-section { padding: 20px; background: white; border-radius: 16px; border: 0.5px solid #f0d0da; }
   .qr-label { font-size: 12px; color: #b5607a; margin-bottom: 12px; font-weight: 500; }
-  #qrCanvas { display: block; margin: 0 auto; }
+  #qrContainer { display: flex; justify-content: center; }
   .qr-hint { font-size: 11px; color: #d4a0b0; margin-top: 10px; line-height: 1.6; }
 </style>
 </head>
@@ -122,18 +130,15 @@
 
       <div class="card">
         <p class="card-title">Foto kenangan (opsional)</p>
-        <div class="photo-tip">
-          <strong>📎 Cara mudah tambah foto:</strong>
-          <ol>
-            <li>Buka <strong>imgbb.com</strong> (gratis, tanpa daftar)</li>
-            <li>Klik <em>Start Uploading</em> → pilih foto</li>
-            <li>Setelah upload, salin link di kolom <em>"Direct link"</em></li>
-            <li>Tempel link tersebut di kolom di bawah</li>
-          </ol>
+        <div class="photo-upload-area" id="uploadArea">
+          <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp,image/heic" />
+          <span class="upload-icon">🖼️</span>
+          <p class="upload-text">Tap untuk pilih foto</p>
+          <p class="upload-hint">JPG, PNG, atau HEIC — foto otomatis dikompres</p>
         </div>
-        <div class="field">
-          <label for="photoUrl">Link foto (dari ImgBB)</label>
-          <input type="text" id="photoUrl" placeholder="https://i.ibb.co/..." />
+        <div class="compress-info" id="compressInfo">✓ Foto dikompres dan siap ditampilkan</div>
+        <div class="photo-preview" id="photoPreview">
+          <img id="previewImg" src="" alt="Preview foto" />
         </div>
       </div>
     </div>
@@ -142,7 +147,7 @@
 
     <div class="submit-section">
       <button class="submit-btn" id="submitBtn">Simpan kenangan →</button>
-      <p class="submit-note">Setelah disimpan, kamu akan mendapat QR siap cetak.</p>
+      <p class="submit-note">Foto tersimpan langsung di halaman kenangan.<br>Tidak dikirim ke server manapun. 🔒</p>
     </div>
   </div>
 
@@ -164,33 +169,94 @@
 <script>
   const messageEl = document.getElementById('message');
   const charCountEl = document.getElementById('charCount');
-
   messageEl.addEventListener('input', function() {
     charCountEl.textContent = this.value.length;
   });
 
-  function convertDriveLink(url) {
-    if (!url) return '';
-    // ImgBB direct links work as-is
-    return url.trim();
+  let photoBase64 = null;
+
+  // Compress image to target size in KB
+  function compressImage(file, targetKB, callback) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        let quality = 0.7;
+        let maxDim = 600; // max width or height in px
+
+        // Scale down dimensions
+        let w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+          else { w = Math.round(w * maxDim / h); h = maxDim; }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+
+        // Try compressing, reduce quality until under targetKB
+        function tryCompress(q) {
+          const data = canvas.toDataURL('image/jpeg', q);
+          const kb = Math.round((data.length * 3) / 4 / 1024);
+          if (kb <= targetKB || q <= 0.15) {
+            callback(data, kb);
+          } else {
+            tryCompress(Math.max(q - 0.1, 0.15));
+          }
+        }
+        tryCompress(quality);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
   }
+
+  document.getElementById('photoInput').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+
+    if (file.size > 15 * 1024 * 1024) {
+      alert('Foto terlalu besar. Maksimal 15 MB.');
+      return;
+    }
+
+    document.getElementById('compressInfo').style.display = 'none';
+    document.getElementById('compressInfo').textContent = '⏳ Mengompres foto...';
+    document.getElementById('compressInfo').style.display = 'block';
+
+    // Target 50KB — cukup untuk tampil bagus, URL tidak terlalu panjang
+    compressImage(file, 50, function(base64, kb) {
+      photoBase64 = base64;
+      document.getElementById('previewImg').src = base64;
+      document.getElementById('photoPreview').style.display = 'block';
+      document.getElementById('compressInfo').textContent = '✓ Foto siap (' + kb + ' KB) — aman & tidak dikirim ke server manapun';
+    });
+  });
 
   document.getElementById('submitBtn').addEventListener('click', function() {
     const name = document.getElementById('name').value.trim();
     const date = document.getElementById('date').value.trim();
     const message = messageEl.value.trim();
     const from = document.getElementById('from').value.trim();
-    const photoUrl = convertDriveLink(document.getElementById('photoUrl').value.trim());
 
     if (!name) { alert('Nama wisudawan wajib diisi.'); return; }
     if (!message) { alert('Pesan wajib diisi.'); return; }
 
     const data = { name, date, message, from };
-    if (photoUrl) data.photo = photoUrl;
+    if (photoBase64) data.photo = photoBase64;
 
     const encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(data)))));
     const baseUrl = window.location.origin + window.location.pathname.replace('form.html', 'index.html');
     const fullUrl = baseUrl + '?d=' + encoded;
+
+    // Check URL length — warn if still too long (rare edge case)
+    if (fullUrl.length > 8000) {
+      alert('Pesan terlalu panjang atau foto masih terlalu besar. Coba perpendek pesan atau pilih foto yang lebih kecil.');
+      return;
+    }
 
     document.getElementById('recipientName').textContent = name;
     document.getElementById('previewLink').href = fullUrl;
