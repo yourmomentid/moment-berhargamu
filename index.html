@@ -265,6 +265,104 @@
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
   }
+
+  /* MUSIC PLAYER */
+  .music-bar {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: white;
+    border: 0.5px solid #f0d0da;
+    border-radius: 40px;
+    padding: 10px 20px 10px 12px;
+    box-shadow: 0 8px 32px rgba(180, 80, 110, 0.18);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    min-width: 200px;
+  }
+
+  .music-bar.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .music-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #d4607a, #e0a0b4);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.15s;
+    box-shadow: 0 2px 8px rgba(180, 80, 110, 0.3);
+  }
+
+  .music-btn:active { transform: scale(0.92); }
+
+  .music-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: white;
+  }
+
+  .music-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+  }
+
+  .music-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b1e36;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .music-sub {
+    font-size: 10px;
+    color: #c490a4;
+  }
+
+  .music-waves {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .music-waves span {
+    display: block;
+    width: 3px;
+    border-radius: 2px;
+    background: #e0a0b4;
+    animation: wave 1s ease-in-out infinite;
+  }
+
+  .music-waves span:nth-child(1) { height: 8px; animation-delay: 0s; }
+  .music-waves span:nth-child(2) { height: 14px; animation-delay: 0.15s; }
+  .music-waves span:nth-child(3) { height: 10px; animation-delay: 0.3s; }
+  .music-waves span:nth-child(4) { height: 6px; animation-delay: 0.45s; }
+
+  .music-waves.paused span { animation-play-state: paused; height: 6px !important; }
+
+  @keyframes wave {
+    0%, 100% { transform: scaleY(0.5); }
+    50% { transform: scaleY(1); }
+  }
 </style>
 </head>
 <body>
@@ -328,6 +426,27 @@
   </div>
 </div>
 
+<!-- MUSIC PLAYER -->
+<audio id="bgMusic" loop preload="auto">
+  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3" type="audio/mpeg">
+</audio>
+
+<div class="music-bar" id="musicBar">
+  <button class="music-btn" id="musicBtn" aria-label="Play musik">
+    <!-- Play icon -->
+    <svg id="iconPlay" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    <!-- Pause icon -->
+    <svg id="iconPause" viewBox="0 0 24 24" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+  </button>
+  <div class="music-info">
+    <span class="music-title">Kenangan Indah</span>
+    <span class="music-sub">Piano · Your Moment ID</span>
+  </div>
+  <div class="music-waves paused" id="musicWaves">
+    <span></span><span></span><span></span><span></span>
+  </div>
+</div>
+
 <script>
   function getParam(key) {
     return new URLSearchParams(window.location.search).get(key);
@@ -380,7 +499,38 @@
         img.style.display = 'block';
         document.getElementById('photoPlaceholder').style.display = 'none';
       }
+
+      // Show music bar after content loads
+      setTimeout(function() {
+        document.getElementById('musicBar').classList.add('visible');
+      }, 600);
+
     }, 800);
+  });
+
+  // Music player logic
+  const audio = document.getElementById('bgMusic');
+  const btn = document.getElementById('musicBtn');
+  const iconPlay = document.getElementById('iconPlay');
+  const iconPause = document.getElementById('iconPause');
+  const waves = document.getElementById('musicWaves');
+  let playing = false;
+
+  btn.addEventListener('click', function() {
+    if (!playing) {
+      audio.play().then(function() {
+        playing = true;
+        iconPlay.style.display = 'none';
+        iconPause.style.display = 'block';
+        waves.classList.remove('paused');
+      }).catch(function() {});
+    } else {
+      audio.pause();
+      playing = false;
+      iconPlay.style.display = 'block';
+      iconPause.style.display = 'none';
+      waves.classList.add('paused');
+    }
   });
 </script>
 </body>
