@@ -125,14 +125,15 @@
         <div class="photo-tip">
           <strong>📎 Cara mudah tambah foto:</strong>
           <ol>
-            <li>Upload foto ke <strong>Google Drive</strong></li>
-            <li>Klik kanan foto → <em>Bagikan</em> → <em>Siapa saja dengan link</em></li>
-            <li>Salin link → tempel di kolom di bawah</li>
+            <li>Buka <strong>imgbb.com</strong> (gratis, tanpa daftar)</li>
+            <li>Klik <em>Start Uploading</em> → pilih foto</li>
+            <li>Setelah upload, salin link di kolom <em>"Direct link"</em></li>
+            <li>Tempel link tersebut di kolom di bawah</li>
           </ol>
         </div>
         <div class="field">
-          <label for="photoUrl">Link foto (Google Drive / Google Photos)</label>
-          <input type="text" id="photoUrl" placeholder="https://drive.google.com/..." />
+          <label for="photoUrl">Link foto (dari ImgBB)</label>
+          <input type="text" id="photoUrl" placeholder="https://i.ibb.co/..." />
         </div>
       </div>
     </div>
@@ -170,10 +171,8 @@
 
   function convertDriveLink(url) {
     if (!url) return '';
-    // Convert Google Drive share link to direct image link
-    const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-    if (match) return 'https://drive.google.com/uc?export=view&id=' + match[1];
-    return url;
+    // ImgBB direct links work as-is
+    return url.trim();
   }
 
   document.getElementById('submitBtn').addEventListener('click', function() {
