@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Moment ID — Isi Kenangan Kamu</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #fdf5f7;
+    color: #3a1c28;
+    min-height: 100vh;
+  }
+
+  .page-wrap {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 0 80px;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(170deg, #f9e0e8 0%, #fdf5f7 100%);
+    padding: 40px 28px 32px;
+    text-align: center;
+  }
+
+  .brand-mark {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    color: #c4718a;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .brand-mark::before,
+  .brand-mark::after {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 0.5px;
+    background: #e0a0b4;
+  }
+
+  .header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    font-weight: 400;
+    color: #6b1e36;
+    margin-bottom: 8px;
+  }
+
+  .header-sub {
+    font-size: 13px;
+    color: #b5607a;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  /* FORM */
+  .form-wrap {
+    margin: 24px 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 22px 20px;
+    border: 0.5px solid #f0d0da;
+  }
+
+  .card-title {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #c490a4;
+    margin-bottom: 14px;
+  }
+
+  .field + .field {
+    margin-top: 14px;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: #7a4050;
+    margin-bottom: 6px;
+  }
+
+  input[type="text"],
+  textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 0.5px solid #e8c8d4;
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    color: #3a1c28;
+    background: #fdf8f9;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  input[type="text"]:focus,
+  textarea:focus {
+    border-color: #d4607a;
+    background: white;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 110px;
+    line-height: 1.6;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #d4a8b8;
+  }
+
+  /* PHOTO UPLOAD */
+  .photo-upload-area {
+    border: 1.5px dashed #e0b8c8;
+    border-radius: 12px;
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    background: #fdf0f4;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+
+  .photo-upload-area:hover {
+    border-color: #d4607a;
+    background: #fde8ed;
+  }
+
+  .photo-upload-area input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .upload-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .upload-text {
+    font-size: 13px;
+    color: #b5607a;
+    font-weight: 500;
+  }
+
+  .upload-hint {
+    font-size: 11px;
+    color: #d4a0b0;
+    margin-top: 4px;
+  }
+
+  .photo-preview {
+    display: none;
+    margin-top: 12px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 0.5px solid #f0d0da;
+  }
+
+  .photo-preview img {
+    width: 100%;
+    display: block;
+    max-height: 220px;
+    object-fit: cover;
+  }
+
+  /* CHAR COUNT */
+  .char-count {
+    text-align: right;
+    font-size: 11px;
+    color: #d4a0b0;
+    margin-top: 4px;
+  }
+
+  /* SUBMIT */
+  .submit-section {
+    margin: 0 20px;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: #c4506a;
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .submit-btn:hover { background: #b04060; }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:disabled { background: #e0b8c8; cursor: not-allowed; }
+
+  .submit-note {
+    text-align: center;
+    font-size: 11px;
+    color: #c490a4;
+    margin-top: 10px;
+    line-height: 1.6;
+  }
+
+  /* SUCCESS STATE */
+  .success-state {
+    display: none;
+    text-align: center;
+    padding: 60px 28px;
+  }
+
+  .success-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .success-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    color: #6b1e36;
+    margin-bottom: 10px;
+  }
+
+  .success-sub {
+    font-size: 13px;
+    color: #b5607a;
+    line-height: 1.7;
+    margin-bottom: 28px;
+  }
+
+  .preview-link {
+    display: inline-block;
+    padding: 13px 28px;
+    background: #c4506a;
+    color: white;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    margin-bottom: 12px;
+  }
+
+  .qr-section {
+    margin-top: 24px;
+    padding: 20px;
+    background: white;
+    border-radius: 16px;
+    border: 0.5px solid #f0d0da;
+  }
+
+  .qr-label {
+    font-size: 12px;
+    color: #b5607a;
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  #qrCanvas {
+    display: block;
+    margin: 0 auto;
+  }
+
+  .qr-hint {
+    font-size: 11px;
+    color: #d4a0b0;
+    margin-top: 10px;
+    line-height: 1.6;
+  }
+
+  /* ERROR */
+  .field-error {
+    font-size: 11px;
+    color: #c4506a;
+    margin-top: 4px;
+  }
+
+  input.error,
+  textarea.error {
+    border-color: #e0a0b0;
+    background: #fff8f9;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <div id="formSection">
+    <div class="header">
+      <div class="brand-mark">Your Moment ID</div>
+      <h1 class="header-title">Isi kenangan kamu 🦋</h1>
+      <p class="header-sub">Tulis pesan dan upload foto untuk orang yang kamu sayangi.<br>Halaman ini akan terbuka saat mereka scan QR-nya.</p>
+    </div>
+
+    <div class="form-wrap">
+      <div class="card">
+        <p class="card-title">Untuk siapa</p>
+        <div class="field">
+          <label for="name">Nama wisudawan</label>
+          <input type="text" id="name" placeholder="cth: Rizky Amalia" maxlength="60" />
+        </div>
+        <div class="field">
+          <label for="date">Tanggal wisuda</label>
+          <input type="text" id="date" placeholder="cth: 14 Juni 2025" maxlength="30" />
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">Pesan kamu</p>
+        <div class="field">
+          <label for="message">Tulis ucapan dari hati</label>
+          <textarea id="message" placeholder="Tulis pesan yang ingin kamu sampaikan..." maxlength="400"></textarea>
+          <p class="char-count"><span id="charCount">0</span>/400</p>
+        </div>
+        <div class="field">
+          <label for="from">Dari siapa</label>
+          <input type="text" id="from" placeholder="cth: Mama & Papa" maxlength="60" />
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">Foto kenangan</p>
+        <div class="photo-upload-area" id="uploadArea">
+          <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp" />
+          <span class="upload-icon">🖼️</span>
+          <p class="upload-text">Pilih foto kenangan</p>
+          <p class="upload-hint">JPG atau PNG, maks. 5 MB</p>
+        </div>
+        <div class="photo-preview" id="photoPreview">
+          <img id="previewImg" src="" alt="Preview foto" />
+        </div>
+      </div>
+    </div>
+
+    <div style="height: 20px;"></div>
+
+    <div class="submit-section">
+      <button class="submit-btn" id="submitBtn">Simpan kenangan →</button>
+      <p class="submit-note">Setelah disimpan, kamu akan mendapat link halaman<br>dan QR yang siap dicetak di papan.</p>
+    </div>
+  </div>
+
+  <!-- SUCCESS STATE -->
+  <div class="success-state" id="successState">
+    <span class="success-icon">🦋</span>
+    <h2 class="success-title">Kenangan tersimpan!</h2>
+    <p class="success-sub">Halaman kenangan sudah siap.<br>Bagikan link atau QR ini kepada <strong id="recipientName">penerima</strong>.</p>
+    <a href="#" id="previewLink" class="preview-link" target="_blank">Lihat halaman kenangan →</a>
+    <div class="qr-section">
+      <p class="qr-label">QR Code siap cetak</p>
+      <canvas id="qrCanvas" width="180" height="180"></canvas>
+      <p class="qr-hint">Screenshot atau download QR ini,<br>lalu cetak di papan akrilik kamu.</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  const messageEl = document.getElementById('message');
+  const charCountEl = document.getElementById('charCount');
+  const photoInput = document.getElementById('photoInput');
+  const previewImg = document.getElementById('previewImg');
+  const photoPreview = document.getElementById('photoPreview');
+  const submitBtn = document.getElementById('submitBtn');
+
+  messageEl.addEventListener('input', function() {
+    charCountEl.textContent = this.value.length;
+  });
+
+  let photoBase64 = null;
+
+  photoInput.addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Ukuran foto terlalu besar. Maksimal 5 MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const MAX = 900;
+        let w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+          else { w = Math.round(w * MAX / h); h = MAX; }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        photoBase64 = canvas.toDataURL('image/jpeg', 0.75);
+        previewImg.src = photoBase64;
+        photoPreview.style.display = 'block';
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  submitBtn.addEventListener('click', function() {
+    const name = document.getElementById('name').value.trim();
+    const date = document.getElementById('date').value.trim();
+    const message = messageEl.value.trim();
+    const from = document.getElementById('from').value.trim();
+
+    if (!name) { alert('Nama wisudawan wajib diisi.'); return; }
+    if (!message) { alert('Pesan wajib diisi.'); return; }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Menyimpan...';
+
+    const data = { name, date, message, from };
+    if (photoBase64) data.photo = photoBase64;
+
+    const encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(data)))));
+    const baseUrl = window.location.origin + window.location.pathname.replace('form.html', 'index.html');
+    const fullUrl = baseUrl + '?d=' + encoded;
+
+    document.getElementById('recipientName').textContent = name;
+    document.getElementById('previewLink').href = fullUrl;
+
+    document.getElementById('formSection').style.display = 'none';
+    document.getElementById('successState').style.display = 'block';
+
+    setTimeout(function() {
+      try {
+        new QRCode(document.getElementById('qrCanvas'), {
+          text: fullUrl,
+          width: 180,
+          height: 180,
+          colorDark: '#6b1e36',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } catch(e) {}
+    }, 300);
+  });
+</script>
+</body>
+</html>
